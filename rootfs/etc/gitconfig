@@ -1,0 +1,6 @@
+# Workspace files belong to the Space owner, not dev; dev writes through the group.
+[safe]
+	directory = /workspace
+	directory = /workspace/*
+[init]
+	defaultBranch = main

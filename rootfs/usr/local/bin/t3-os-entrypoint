@@ -1,0 +1,68 @@
+#!/bin/bash
+# Installs T3 Code and the Provider CLIs into the home volume on first start,
+# then runs T3 Code. Both live where dev can write, so T3 Code updates them.
+# T3_OS_MODE=launcher (default) runs T3's service launcher, which updates T3
+# in place; T3_OS_MODE=serve re-runs the installer each start, then `t3 serve`.
+set -euo pipefail
+umask 002
+
+runtime="$T3CODE_HOME/runtime"
+state="$runtime/service-state.json"
+mkdir -p "$T3CODE_HOME" "$HOME/.local/bin"
+
+log() { printf '[t3-code-os] %s\n' "$*" >&2; }
+
+active_version() {
+  [ -f "$state" ] || return 0
+  sed -n 's/.*"activeVersion": *"\([^"]*\)".*/\1/p' "$state" | head -n1
+}
+
+installed() { [ -n "$1" ] && [ -f "$runtime/versions/$1/.install-complete" ]; }
+
+install_t3() {
+  log "Installing T3 Code (${T3CODE_VERSION:-channel $T3CODE_CHANNEL})..."
+  local script
+  script="$(mktemp)"
+  curl -fsSL https://t3.codes/install.sh -o "$script"
+  sh "$script" </dev/null
+  rm -f "$script"
+}
+
+# The version the installer last linked as ~/.local/bin/t3.
+linked_version() {
+  basename "$(dirname "$(readlink -f "$HOME/.local/bin/t3")")"
+}
+
+# npm global installs under NPM_CONFIG_PREFIX (~/.local), the prefix T3 Code's
+# Provider updater finds and reinstalls into. Once installed, T3 owns updates.
+install_providers() {
+  local missing=()
+  command -v claude >/dev/null || missing+=(@anthropic-ai/claude-code)
+  command -v codex >/dev/null || missing+=(@openai/codex)
+  [ ${#missing[@]} -eq 0 ] && return 0
+  log "Installing ${missing[*]}..."
+  npm install -g --no-fund --no-audit "${missing[@]}" ||
+    log "Provider CLI install failed; it will be retried on the next start."
+}
+
+install_providers
+
+if [ "$T3_OS_MODE" = serve ]; then
+  install_t3
+  exec t3 serve
+fi
+
+version="$(active_version)"
+if ! installed "$version"; then
+  install_t3
+  version="$(linked_version)"
+  # The state `t3 service install` would write: the launcher starts from it.
+  printf '{\n  "protocol": 3,\n  "activeVersion": "%s"\n}\n' "$version" >"$state.tmp"
+  mv "$state.tmp" "$state"
+  chmod 600 "$state"
+fi
+
+# Keep `t3` on PATH pointing at what the launcher runs, for `t3 pair` and friends.
+ln -sfn "$runtime/versions/$version/t3" "$HOME/.local/bin/t3"
+log "Starting T3 Code $version under its service launcher."
+exec "$runtime/versions/$version/t3" __service-launcher

@@ -1,0 +1,44 @@
+id: t3-code
+name: T3 Code
+summary: A headless T3 Code server where coding agents work in a sandbox on your Node.
+description: |
+  Runs T3 Code as a Remote Environment: pair the desktop app, app.t3.codes or
+  a browser with it, and Claude Code and Codex work inside this Service with
+  Rust, Go, Node, Python and a headless browser, never touching the Node.
+
+  First start installs T3 Code, which then keeps itself updated on the chosen
+  channel. To pair your first device, open this Service's Logs and copy the
+  pairing link, replacing its 10.90.x.x address with this Service's address
+  and keeping everything from /pair on. Then, in T3 Code's terminal, log in to the agents with
+  `claude` (then /login) and `codex login --device-auth`. To reach it through
+  your T3 account, run `t3 connect --headless` there and restart the Service.
+
+  Projects live in the Workspace folder you pick, so you can copy files in and
+  out from Files.
+icon: icon.svg
+category: tools
+image: ghcr.io/onfire7/t3-code-os:1.0.0@sha256:UNPUBLISHED
+version: 1.0.0
+project: https://github.com/pingdotgg/t3code
+exposure: remote
+own_login: true
+web:
+  port: 3773
+  path: /
+volumes:
+  - name: home
+    path: /home/dev
+  - name: workspace
+    path: /workspace
+    size: large
+    shared: true
+settings:
+  - key: T3CODE_CHANNEL
+    label: T3 Code release channel (stable or nightly)
+    type: text
+    default: stable
+health:
+  http: /.well-known/t3/environment
+unfinished:
+  - Pin image to the digest CI publishes for ghcr.io/onfire7/t3-code-os:1.0.0
+  - Copy icon.svg with `maitre catalog icon entries/t3-code`

@@ -1,0 +1,8 @@
+[Container]
+Image={{ .Image }}
+ContainerName={{ .Name }}
+Network={{ .Network }}
+Environment="T3CODE_CHANNEL={{ .Settings.T3CODE_CHANNEL }}"
+Volume={{ .Volumes.home }}:/home/dev:Z,U
+Volume={{ .Volumes.workspace }}:/workspace:Z
+ShmSize=1g
