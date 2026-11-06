@@ -17,8 +17,8 @@ description: |
   out from Files.
 icon: icon.svg
 category: tools
-image: ghcr.io/onfire7/t3-code-os:1.0.0@sha256:UNPUBLISHED
-version: 1.0.0
+image: ghcr.io/onfire7/t3-code-os:1.0.0@sha256:788d49780e6fe099cf746c26275abef7383caff4304ee39c9c85a49b2c20e39b
+version: "1.0.0"
 project: https://github.com/pingdotgg/t3code
 exposure: remote
 own_login: true
@@ -39,6 +39,9 @@ settings:
     default: stable
 health:
   http: /.well-known/t3/environment
-unfinished:
-  - Pin image to the digest CI publishes for ghcr.io/onfire7/t3-code-os:1.0.0
-  - Copy icon.svg with `maitre catalog icon entries/t3-code`
+source:
+  from: hand
+  icon:
+    pack: selfh.st/icons
+    licence: CC-BY-4.0
+    url: https://raw.githubusercontent.com/selfhst/icons/87a5dfd901a341e271eb453ffebce6c5a88c308e/svg/t3-code.svg

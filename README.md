@@ -43,8 +43,9 @@ updates the Provider CLIs where they are installed
 ## Releasing
 
 Push a `vX.Y.Z` tag: CI publishes `ghcr.io/onfire7/t3-code-os:X.Y.Z` (and
-`X.Y`, `X`). A weekly run rebuilds the latest tag for Debian patches. Then pin the digest in `catalog/t3-code/manifest.yaml` and copy
-the entry to `maitre-catalog/entries/t3-code/`.
+`X.Y`, `X`). Then pin the tag's digest in `catalog/t3-code/manifest.yaml` and
+copy the entry to `maitre-catalog/entries/t3-code/`. A weekly run rebuilds the
+latest tag for Debian patches; the Catalog's `catalog outdated` job repins it.
 
 ## Local testing
 
